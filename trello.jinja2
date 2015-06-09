@@ -1,0 +1,90 @@
+{% extends "base.jinja2" %}
+
+{% block title %}{{ name }}{% endblock %}
+
+{% block content %}
+				<div class="page-header">
+								<h1>
+												<a href="{{ shortUrl }}">{{ name }}</a>
+												<small>Project Status</small>
+								</h1>
+				</div>
+
+				<p>Last updated {{ dateLastActivity|datetime }}</p>
+
+				{% if members %}
+								<h2>Project Members</h2>
+								<table class="table table-striped table-hover table-condensed">
+												<thead>
+																<tr>
+																				<th>Initials</th>
+																				<th>Full Name</th>
+																				<th>User Name</th>
+																</tr>
+												</thead>
+												<tbody>
+																{% for member in members|sort(attribute='initials') %}
+																				<tr>
+																								<td><a href="{{ member.url }}">{{ member.initials }}</a></td>
+																								<td><a href="{{ member.url }}">{{ member.fullName }}</a></td>
+																								<td>{{ member.username }}</td>
+																				</tr>
+																{% endfor %}
+												</tbody>
+								</table>
+				{% endif %}
+
+				{% for list in lists|sort(attribute='pos') %}
+								{% if list.cards %}
+												<h2>{{ list.name }} <small>List</small></h2>
+												<table class="table table-striped table-hover table-condensed">
+																<thead>
+																				<tr>
+																								<th class="col-md-2">Card (Priority Order)</th>
+																								<th class="col-md-4">Description</th>
+																								<th class="col-md-4">Checklists</th>
+																								<th class="col-md-1">Members</th>
+																								<th class="col-md-1">Updated</th>
+																				</tr>
+																</thead>
+																<tbody>
+																				{% for card in list.cards|sort(attribute='pos') if not card.closed %}
+																								<tr>
+																												<td>
+																																<a href="{{ card.shortUrl }}">{{ card.name }}</a>
+																												</td>
+																												<td>
+																																{{ card.desc|nl2br }}
+																												</td>
+																												<td>
+																																{% for checklist in card.checklists %}
+																																				<p><strong>{{ checklist.name }}</strong></p>
+																																				<ol>
+																																								{% for item in checklist.checkItems|sort(attribute='pos') %}
+																																												<li>
+																																																{{ item.name }}
+																																																{% if item.state == 'complete' %}
+																																																				<span class="label label-success">Complete</span>
+																																																{% endif %}
+																																												</li>
+																																								{% endfor %}
+																																				</ol>
+																																{% endfor %}
+																												</td>
+																												<td>
+																																{% for member in card.members|sort(attribute='initials') %}
+																																				<a href="{{ member.url }}" title="{{ member.fullName }}">
+																																								{{ member.initials }}
+																																				</a>
+																																				{%- if not loop.last %}, {% endif -%}
+																																{% endfor %}
+																																<td>
+																																				{{ card.dateLastActivity|datetime }}
+																																</td>
+																								</tr>
+																				{% endfor %}
+																</tbody>
+												</table>
+								{% endif %}
+				{% endfor %}
+{% endblock %}
